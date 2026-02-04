@@ -40,17 +40,32 @@
         @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; scale: 1; } 100% { transform: translateY(-60px); opacity: 0; scale: 1.2; } }
         .glow-text { text-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
         .floating-intel { position: absolute; bottom: 110%; left: 0; width: 280px; background: hsl(240 10% 12%); border: 1px solid hsl(142.1 70.6% 45.3%); padding: 12px; border-radius: 12px; z-index: 60; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; pointer-events: none; }
-        .group:focus-within .floating-intel { display: block; }
+        .group:hover .floating-intel { display: block; }
+        
+        /* Progress Bar Styles */
+        .war-progress-container { width: 100%; background: hsl(240 3.7% 15.9%); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 1rem; position: relative; }
+        .war-progress-bar { height: 100%; background: linear-gradient(90deg, hsl(142.1 70.6% 45.3%), #22c55e); transition: width 0.5s ease-out; }
+        .war-progress-info { display: flex; justify-content: space-between; font-size: 10px; font-weight: 900; text-transform: uppercase; color: hsl(240 5% 64.9%); margin-top: 0.5rem; letter-spacing: 0.05em; }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen">
     <div class="max-w-4xl mx-auto space-y-8">
         <header class="flex flex-col md:flex-row justify-between items-center border-b border-zinc-800 pb-8 sticky top-0 bg-background/90 backdrop-blur-xl z-50">
-            <div class="text-center md:text-left mb-4 md:mb-0">
-                <h1 class="text-3xl font-black tracking-tighter">4º GUERRA <span class="text-primary glow-text">CALCULATOR</span></h1>
+            <div class="text-center md:text-left mb-4 md:mb-0 w-full md:w-auto">
+                <h1 class="text-3xl font-black tracking-tighter">CALCULADORA <span class="text-primary glow-text">GUERRA</span></h1>
                 <div class="flex items-center gap-3 mt-1 justify-center md:justify-start">
                     <p class="text-[10px] text-muted-foreground uppercase font-mono tracking-widest">System Status: Active</p>
-                    <input type="date" id="reportDate" class="!w-auto bg-transparent border-none text-[10px] p-0 font-mono text-primary cursor-pointer">
+                    <input type="date" id="reportDate" onmouseover="this.showPicker()" onchange="updateWarProgress()" class="!w-auto bg-transparent border-none text-[10px] p-0 font-mono text-primary cursor-pointer">
+                </div>
+                
+                <!-- War Progress Bar -->
+                <div class="war-progress-container">
+                    <div id="warProgressBar" class="war-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="war-progress-info">
+                    <span>Início: 02 Fev</span>
+                    <span id="warProgressText">Dia 0</span>
+                    <span>Fim: 15 Fev</span>
                 </div>
             </div>
             <div class="text-right">
@@ -310,35 +325,73 @@
         document.getElementById('reportDate').valueAsDate = new Date();
         let lastPoints = 0;
 
+        function updateWarProgress() {
+            const dateInput = document.getElementById('reportDate').value;
+            if (!dateInput) return;
+            
+            const selectedDate = new Date(dateInput + 'T12:00:00');
+            const startDate = new Date('2026-02-02T00:00:00');
+            const endDate = new Date('2026-02-15T23:59:59');
+            
+            const totalDuration = endDate - startDate;
+            const currentElapsed = selectedDate - startDate;
+            
+            let percentage = (currentElapsed / totalDuration) * 100;
+            percentage = Math.max(0, Math.min(100, percentage));
+            
+            const dayOfWar = Math.floor(currentElapsed / (1000 * 60 * 60 * 24)) + 1;
+            const totalDays = Math.ceil(totalDuration / (1000 * 60 * 60 * 24));
+            
+            document.getElementById('warProgressBar').style.width = percentage + '%';
+            
+            if (dayOfWar < 1) {
+                document.getElementById('warProgressText').innerText = 'Guerra ainda não começou';
+            } else if (dayOfWar > totalDays) {
+                document.getElementById('warProgressText').innerText = 'Guerra encerrada';
+            } else {
+                document.getElementById('warProgressText').innerText = `Dia ${dayOfWar} de ${totalDays}`;
+            }
+        }
+
+        // Initialize progress
+        setTimeout(updateWarProgress, 100);
+
         function timeToHours(timeStr) {
             if (!timeStr || typeof timeStr !== 'string') return 0;
+            // Handle X.5 format
+            if (!isNaN(timeStr) || (timeStr.includes('.') && !timeStr.toLowerCase().includes('h'))) {
+                return parseFloat(timeStr) || 0;
+            }
+            
             let hours = 0;
-            const hMatch = timeStr.match(/(\d+)h/i);
+            const hMatch = timeStr.match(/(\d+(\.\d+)?)h/i);
             const mMatch = timeStr.match(/(\d+)m/i);
             const sMatch = timeStr.match(/(\d+)s/i);
-            if (hMatch) hours += parseInt(hMatch[1]);
+            
+            if (hMatch) hours += parseFloat(hMatch[1]);
             if (mMatch) hours += parseInt(mMatch[1]) / 60;
             if (sMatch) hours += parseInt(sMatch[1]) / 3600;
+            
             return hours || 0;
         }
 
         function formatHMS(h) {
             const hrs = Math.floor(h);
-            const mins = Math.floor((h - hrs) * 60);
+            const mins = Math.floor(Math.round((h - hrs) * 60 * 100) / 100);
             const secs = Math.round(((h - hrs) * 60 - mins) * 60);
             return `${hrs}h ${mins}m ${secs}s`;
         }
 
         function updateRange(id) {
-            const val = document.getElementById(id).value;
-            document.getElementById(id + '-val').innerText = parseFloat(val).toFixed(1) + 'h';
-            document.getElementById(id + '-exact').value = val + 'h';
+            const val = parseFloat(document.getElementById(id).value);
+            document.getElementById(id + '-val').innerText = val.toFixed(1) + 'h';
+            document.getElementById(id + '-exact').value = val.toFixed(1) + 'h';
             calcWithAnim(id);
         }
 
         function updateExact(id) {
-            const val = document.getElementById(id + '-exact').value;
-            const h = timeToHours(val);
+            const valStr = document.getElementById(id + '-exact').value;
+            const h = timeToHours(valStr);
             document.getElementById(id).value = h;
             document.getElementById(id + '-val').innerText = h.toFixed(1) + 'h';
             calcWithAnim(id);
@@ -368,18 +421,25 @@
         function calculateTotal() {
             let total = 0;
             const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
+            const getExactV = (id) => timeToHours(document.getElementById(id + '-exact').value) || 0;
             const isC = (id) => document.getElementById(id).checked;
 
-            const h = getV('hours');
-            const sh = getV('streamHours');
-            const ch = getV('camHours');
-            const mad = getV('madrugada');
+            const h = getExactV('hours');
+            const sh = getExactV('streamHours');
+            const ch = getExactV('camHours');
+            const mad = getExactV('madrugada');
             
-            total += (h + sh + ch) * 100;
-            let mult = 1;
-            if (sh > 0 && ch > 0) mult = 1.6;
-            else if (sh > 0 || ch > 0) mult = 1.3;
-            if (mult > 1) total += ((sh + ch) * 100 * (mult - 1));
+            // Base time points
+            let timePoints = (h + sh + ch) * 100;
+            
+            // Automatic Multipliers
+            if (sh > 0 && ch > 0) {
+                timePoints *= 1.6;
+            } else if (sh > 0 || ch > 0) {
+                timePoints *= 1.3;
+            }
+            
+            total += timePoints;
 
             const totalH = h + sh + ch;
             if (totalH >= 12) total += 300;
@@ -412,9 +472,9 @@
 
         function updateDisplay(total) {
             document.getElementById('total-points').innerText = Math.floor(total).toLocaleString() + " PTS";
-            const h = parseFloat(document.getElementById('hours').value);
-            const sh = parseFloat(document.getElementById('streamHours').value);
-            const ch = parseFloat(document.getElementById('camHours').value);
+            const h = timeToHours(document.getElementById('hours-exact').value) || 0;
+            const sh = timeToHours(document.getElementById('streamHours-exact').value) || 0;
+            const ch = timeToHours(document.getElementById('camHours-exact').value) || 0;
             document.getElementById('total-hours-sum').innerText = formatHMS(h + sh + ch);
             generateReport(total);
         }
@@ -428,11 +488,18 @@
             const work = document.getElementById('workSchool').checked ? `SIM (${document.getElementById('workSchoolName').value})` : 'NÃO';
             const coletiva = document.getElementById('coletiva').checked ? `SIM (Com: ${document.getElementById('coletivaWith').value})` : 'NÃO';
             
+            const shHours = timeToHours(sh);
+            const chHours = timeToHours(ch);
+            let multText = "1.0x (Normal)";
+            if (shHours > 0 && chHours > 0) multText = "1.6x (Foco Máximo)";
+            else if (shHours > 0 || chHours > 0) multText = "1.3x (Foco Vídeo)";
+
             let report = `[RELATÓRIO DE DESEMPENHO - ${date}]\n`;
             report += `-------------------------------------------\n`;
             report += `TEMPO DE ESTUDO: ${h} (Normais)\n`;
-            if (timeToHours(sh) > 0 || timeToHours(ch) > 0) report += `CHAMADAS: ${sh} Stream / ${ch} Cam\n`;
+            if (shHours > 0 || chHours > 0) report += `CHAMADAS: ${sh} Stream / ${ch} Cam\n`;
             report += `TEMPO TOTAL: ${document.getElementById('total-hours-sum').innerText}\n`;
+            report += `FOCO: ${multText}\n`;
             report += `HORAS DE OURO: ${mad}\n`;
             report += `PÁGINAS LIDAS: ${document.getElementById('pages').value}\n`;
             report += `-------------------------------------------\n`;
