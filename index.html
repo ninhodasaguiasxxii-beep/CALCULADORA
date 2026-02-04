@@ -418,6 +418,89 @@
             updateDisplay(currentTotal);
         }
 
+        function generateReport(total) {
+            const dateInput = document.getElementById('reportDate').value;
+            const date = dateInput ? dateInput.split('-').reverse().join('/') : '';
+            
+            const hRaw = document.getElementById('hours-exact').value;
+            const shRaw = document.getElementById('streamHours-exact').value;
+            const chRaw = document.getElementById('camHours-exact').value;
+            const madRaw = document.getElementById('madrugada-exact').value;
+            
+            const h = timeToHours(hRaw);
+            const sh = timeToHours(shRaw);
+            const ch = timeToHours(chRaw);
+            const mad = timeToHours(madRaw);
+            const pages = parseInt(document.getElementById('pages').value) || 0;
+
+            const totalH = h + sh + ch;
+            const metaBatida = totalH >= 3;
+            
+            const e1 = parseInt(document.getElementById('essay1').value) || 0;
+            const e2 = parseInt(document.getElementById('essay2').value) || 0;
+            const e3 = parseInt(document.getElementById('essay3').value) || 0;
+            const e4 = parseInt(document.getElementById('essay4').value) || 0;
+            
+            const q_mfq1 = parseInt(document.getElementById('q_mfq1').value) || 0;
+            const q_mfq2 = parseInt(document.getElementById('q_mfq2').value) || 0;
+            const q_mfq3 = parseInt(document.getElementById('q_mfq3').value) || 0;
+            const q_mfq4 = parseInt(document.getElementById('q_mfq4').value) || 0;
+            
+            const q_hum1 = parseInt(document.getElementById('q_hum1').value) || 0;
+            const q_hum2 = parseInt(document.getElementById('q_hum2').value) || 0;
+            const q_hum3 = parseInt(document.getElementById('q_hum3').value) || 0;
+            const q_hum4 = parseInt(document.getElementById('q_hum4').value) || 0;
+            
+            const q_lin1 = parseInt(document.getElementById('q_lin1').value) || 0;
+            const q_lin2 = parseInt(document.getElementById('q_lin2').value) || 0;
+            const q_lin3 = parseInt(document.getElementById('q_lin3').value) || 0;
+            const q_lin4 = parseInt(document.getElementById('q_lin4').value) || 0;
+
+            const shHours = sh;
+            const chHours = ch;
+            let multText = "1.0x (Normal)";
+            if (shHours > 0 && chHours > 0) multText = "1.6x (Foco Máximo)";
+            else if (shHours > 0 || chHours > 0) multText = "1.3x (Foco Vídeo)";
+
+            let report = `[RELATÓRIO DE DESEMPENHO - ${date}]\n`;
+            report += `-------------------------------------------\n`;
+            
+            if (h > 0) report += `TEMPO DE ESTUDO: ${hRaw} (Normais)\n`;
+            if (sh > 0 || ch > 0) report += `CHAMADAS: ${shRaw || '0h'} Stream / ${chRaw || '0h'} Cam\n`;
+            
+            if (totalH > 0) report += `TEMPO TOTAL: ${document.getElementById('total-hours-sum').innerText}\n`;
+            
+            if (!metaBatida) {
+                report += `⚠️ META DIÁRIA: NÃO BATIDA (-300 PTS)\n`;
+            } else {
+                report += `✅ META DIÁRIA: BATIDA (Mín. 3h)\n`;
+            }
+
+            report += `FOCO: ${multText}\n`;
+            
+            if (mad > 0) report += `HORAS DE OURO: ${madRaw}\n`;
+            report += `PÁGINAS LIDAS: ${pages}\n`;
+            report += `-------------------------------------------\n`;
+            
+            report += `REDAÇÕES: ${e1} N1 | ${e2} N2 | ${e3} N3 | ${e4} N4\n`;
+            report += `QUESTÕES MFQ: ${q_mfq1} N1 | ${q_mfq2} N2 | ${q_mfq3} N3 | ${q_mfq4} N4\n`;
+            report += `QUESTÕES HUMANAS: ${q_hum1} N1 | ${q_hum2} N2 | ${q_hum3} N3 | ${q_hum4} N4\n`;
+            report += `QUESTÕES LINGUAGENS: ${q_lin1} N1 | ${q_lin2} N2 | ${q_lin3} N3 | ${q_lin4} N4\n`;
+            
+            report += `-------------------------------------------\n`;
+
+            const work = document.getElementById('workSchool').checked ? `SIM (${document.getElementById('workSchoolName').value || 'Não informado'})` : 'NÃO';
+            const coletiva = document.getElementById('coletiva').checked ? `SIM (Com: ${document.getElementById('coletivaWith').value || 'Não informado'})` : 'NÃO';
+
+            report += `TEVE AULA/TRABALHO: ${work}\n`;
+            report += `LISTA COLETIVA: ${coletiva}\n`;
+            report += `SIMULADO: ${document.getElementById('simulado').checked ? 'REALIZADO' : 'NÃO REALIZADO'}\n`;
+
+            report += `-------------------------------------------\n`;
+            report += `PONTUAÇÃO FINAL: ${Math.floor(total).toLocaleString()} PTS\n`;
+            document.getElementById('report').innerText = report;
+        }
+
         function calculateTotal() {
             let total = 0;
             const getV = (id) => parseFloat(document.getElementById(id).value) || 0;
@@ -429,8 +512,15 @@
             const ch = getExactV('camHours');
             const mad = getExactV('madrugada');
             
+            const totalH = h + sh + ch;
+            
+            // Meta diária: -300 se totalH < 3
+            if (totalH < 3) {
+                total -= 300;
+            }
+
             // Base time points
-            let timePoints = (h + sh + ch) * 100;
+            let timePoints = totalH * 100;
             
             // Automatic Multipliers
             if (sh > 0 && ch > 0) {
@@ -441,7 +531,6 @@
             
             total += timePoints;
 
-            const totalH = h + sh + ch;
             if (totalH >= 12) total += 300;
             else if (totalH >= 8) total += 200;
             else if (totalH >= 5) total += 100;
@@ -479,47 +568,10 @@
             generateReport(total);
         }
 
-        function generateReport(total) {
-            const date = document.getElementById('reportDate').value;
-            const h = document.getElementById('hours-exact').value || '0h';
-            const sh = document.getElementById('streamHours-exact').value || '0h';
-            const ch = document.getElementById('camHours-exact').value || '0h';
-            const mad = document.getElementById('madrugada-exact').value || '0h';
-            const work = document.getElementById('workSchool').checked ? `SIM (${document.getElementById('workSchoolName').value})` : 'NÃO';
-            const coletiva = document.getElementById('coletiva').checked ? `SIM (Com: ${document.getElementById('coletivaWith').value})` : 'NÃO';
-            
-            const shHours = timeToHours(sh);
-            const chHours = timeToHours(ch);
-            let multText = "1.0x (Normal)";
-            if (shHours > 0 && chHours > 0) multText = "1.6x (Foco Máximo)";
-            else if (shHours > 0 || chHours > 0) multText = "1.3x (Foco Vídeo)";
-
-            let report = `[RELATÓRIO DE DESEMPENHO - ${date}]\n`;
-            report += `-------------------------------------------\n`;
-            report += `TEMPO DE ESTUDO: ${h} (Normais)\n`;
-            if (shHours > 0 || chHours > 0) report += `CHAMADAS: ${sh} Stream / ${ch} Cam\n`;
-            report += `TEMPO TOTAL: ${document.getElementById('total-hours-sum').innerText}\n`;
-            report += `FOCO: ${multText}\n`;
-            report += `HORAS DE OURO: ${mad}\n`;
-            report += `PÁGINAS LIDAS: ${document.getElementById('pages').value}\n`;
-            report += `-------------------------------------------\n`;
-            report += `REDAÇÕES: ${document.getElementById('essay1').value} N1 | ${document.getElementById('essay2').value} N2 | ${document.getElementById('essay3').value} N3 | ${document.getElementById('essay4').value} N4\n`;
-            report += `QUESTÕES MFQ: ${document.getElementById('q_mfq1').value} N1 | ${document.getElementById('q_mfq2').value} N2 | ${document.getElementById('q_mfq3').value} N3 | ${document.getElementById('q_mfq4').value} N4\n`;
-            report += `QUESTÕES HUMANAS: ${document.getElementById('q_hum1').value} N1 | ${document.getElementById('q_hum2').value} N2 | ${document.getElementById('q_hum3').value} N3 | ${document.getElementById('q_hum4').value} N4\n`;
-            report += `QUESTÕES LINGUAGENS: ${document.getElementById('q_lin1').value} N1 | ${document.getElementById('q_lin2').value} N2 | ${document.getElementById('q_lin3').value} N3 | ${document.getElementById('q_lin4').value} N4\n`;
-            report += `-------------------------------------------\n`;
-            report += `TEVE AULA/TRABALHO: ${work}\n`;
-            report += `LISTA COLETIVA: ${coletiva}\n`;
-            report += `SIMULADO: ${document.getElementById('simulado').checked ? 'REALIZADO' : 'NÃO REALIZADO'}\n`;
-            report += `-------------------------------------------\n`;
-            report += `PONTUAÇÃO FINAL: ${Math.floor(total)} PTS\n`;
-            document.getElementById('report').innerText = report;
-        }
-
         function copyReport() {
             const text = document.getElementById('report').innerText;
             navigator.clipboard.writeText(text).then(() => {
-                const btn = event.target;
+                const btn = document.querySelector('button[onclick="copyReport()"]');
                 const old = btn.innerText;
                 btn.innerText = "COPIADO COM SUCESSO!";
                 setTimeout(() => btn.innerText = old, 2000);
