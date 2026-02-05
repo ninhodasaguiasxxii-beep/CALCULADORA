@@ -34,7 +34,7 @@
         .hover-elevate:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.5); }
         
         /* Team Selection Overlay */
-        #team-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-blur: 10px; z-index: 100; display: flex; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #team-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); backdrop-blur: 15px; z-index: 100; display: flex; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; }
         #team-overlay.hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
         
         .team-card { cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid rgba(255,255,255,0.05); padding: 2.5rem; border-radius: 32px; background: rgba(255,255,255,0.03); text-align: center; width: 320px; position: relative; overflow: hidden; }
@@ -45,6 +45,18 @@
         .team-card.urss { --hover-color: #ef4444; }
         .team-card.usa:hover { border-color: #3b82f6; box-shadow: 0 0 50px rgba(59, 130, 246, 0.2); }
         .team-card.urss:hover { border-color: #ef4444; box-shadow: 0 0 50px rgba(239, 68, 68, 0.2); }
+
+        @media (max-width: 768px) {
+            #team-overlay { align-items: flex-start; padding: 2rem 1rem; }
+            #team-overlay .max-w-4xl { margin-top: 1rem; }
+            #team-overlay h2 { font-size: 2.5rem; line-height: 1; }
+            #team-overlay p.text-zinc-500 { font-size: 0.75rem; }
+            .team-card { padding: 1.5rem; border-radius: 24px; width: 100%; max-width: 280px; }
+            .team-card span { font-size: 1.5rem; }
+            .team-card img { border-radius: 12px; }
+            .flex-col.md\:flex-row { gap: 2rem !important; }
+            .text-2xl.italic { font-size: 1.25rem; margin: 0.5rem 0; }
+        }
 
         .team-flag { cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); filter: grayscale(0.8); opacity: 0.5; border-radius: 4px; }
         .team-flag:hover { filter: grayscale(0.2); opacity: 0.8; transform: scale(1.1); }
@@ -107,27 +119,27 @@
                 <p id="overlay-error" class="text-red-500 text-[10px] font-bold uppercase tracking-widest hidden">Você precisa informar seu @Discord e selecionar um time!</p>
             </div>
 
-            <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+            <div class="flex items-center justify-center gap-6 md:gap-12">
                 <div class="team-card usa" onclick="validateAndSetTeam('usa')" onmouseenter="previewTeam('usa')" onmouseleave="previewTeam(null)">
-                    <div class="relative mb-6">
-                        <img src="https://flagcdn.com/w640/us.png" class="w-full aspect-video object-cover rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-110" alt="USA">
-                        <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20"></div>
+                    <div class="relative mb-4 md:mb-6">
+                        <img src="https://flagcdn.com/w640/us.png" class="w-full aspect-video object-cover rounded-xl md:rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-110" alt="USA">
+                        <div class="absolute inset-0 rounded-xl md:rounded-2xl ring-1 ring-inset ring-white/20"></div>
                     </div>
-                    <span class="text-3xl font-black uppercase tracking-tighter text-blue-500 block mb-2">Estados Unidos</span>
-                    <div class="h-1 w-12 bg-blue-600 mx-auto mb-4 rounded-full"></div>
-                    <p class="text-[10px] text-zinc-400 font-bold tracking-[0.3em] uppercase">Democracia & Prosperidade</p>
+                    <span class="text-xl md:text-3xl font-black uppercase tracking-tighter text-blue-500 block mb-1 md:mb-2">USA</span>
+                    <div class="h-1 w-8 md:w-12 bg-blue-600 mx-auto mb-2 md:mb-4 rounded-full"></div>
+                    <p class="text-[8px] md:text-[10px] text-zinc-400 font-bold tracking-[0.2em] md:tracking-[0.3em] uppercase hidden md:block">Democracia</p>
                 </div>
 
-                <div class="text-2xl font-black text-zinc-700 italic">VS</div>
+                <div class="text-xl md:text-2xl font-black text-zinc-700 italic">VS</div>
 
                 <div class="team-card urss" onclick="validateAndSetTeam('urss')" onmouseenter="previewTeam('urss')" onmouseleave="previewTeam(null)">
-                    <div class="relative mb-6">
-                        <img src="https://flagcdn.com/w640/ru.png" class="w-full aspect-video object-cover rounded-2xl shadow-2xl" alt="URSS">
-                        <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20"></div>
+                    <div class="relative mb-4 md:mb-6">
+                        <img src="https://flagcdn.com/w640/ru.png" class="w-full aspect-video object-cover rounded-xl md:rounded-2xl shadow-2xl" alt="URSS">
+                        <div class="absolute inset-0 rounded-xl md:rounded-2xl ring-1 ring-inset ring-white/20"></div>
                     </div>
-                    <span class="text-3xl font-black uppercase tracking-tighter text-red-500 block mb-2">União Soviética</span>
-                    <div class="h-1 w-12 bg-red-600 mx-auto mb-4 rounded-full"></div>
-                    <p class="text-[10px] text-zinc-400 font-bold tracking-[0.3em] uppercase">Revolução & Coletividade</p>
+                    <span class="text-xl md:text-3xl font-black uppercase tracking-tighter text-red-500 block mb-1 md:mb-2">URSS</span>
+                    <div class="h-1 w-8 md:w-12 bg-red-600 mx-auto mb-2 md:mb-4 rounded-full"></div>
+                    <p class="text-[8px] md:text-[10px] text-zinc-400 font-bold tracking-[0.2em] md:tracking-[0.3em] uppercase hidden md:block">Revolução</p>
                 </div>
             </div>
         </div>
