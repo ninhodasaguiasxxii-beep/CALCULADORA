@@ -29,9 +29,54 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { background-color: hsl(240 10% 3.9%); color: hsl(0 0% 98%); font-family: 'Inter', sans-serif; }
+        body { background-color: hsl(240 10% 3.9%); color: hsl(0 0% 98%); font-family: 'Inter', sans-serif; transition: background-color 0.5s ease; }
         .hover-elevate { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-elevate:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -20px rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.5); }
+        
+        /* Team Selection Overlay */
+        #team-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-blur: 10px; z-index: 100; display: flex; align-items: center; justify-content: center; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        #team-overlay.hidden { opacity: 0; pointer-events: none; transform: scale(1.1); }
+        
+        .team-card { cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid rgba(255,255,255,0.05); padding: 2.5rem; border-radius: 32px; background: rgba(255,255,255,0.03); text-align: center; width: 320px; position: relative; overflow: hidden; }
+        .team-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at center, var(--hover-color, transparent) 0%, transparent 70%); opacity: 0; transition: opacity 0.4s; }
+        .team-card:hover { transform: translateY(-15px) scale(1.05); background: rgba(255,255,255,0.08); }
+        .team-card:hover::before { opacity: 0.15; }
+        .team-card.usa { --hover-color: #3b82f6; }
+        .team-card.urss { --hover-color: #ef4444; }
+        .team-card.usa:hover { border-color: #3b82f6; box-shadow: 0 0 50px rgba(59, 130, 246, 0.2); }
+        .team-card.urss:hover { border-color: #ef4444; box-shadow: 0 0 50px rgba(239, 68, 68, 0.2); }
+
+        .team-flag { cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); filter: grayscale(0.8); opacity: 0.5; border-radius: 4px; }
+        .team-flag:hover { filter: grayscale(0.2); opacity: 0.8; transform: scale(1.1); }
+        .team-flag.active { filter: grayscale(0); opacity: 1; transform: scale(1.2); outline: 2px solid var(--team-color, #22c55e); outline-offset: 4px; box-shadow: 0 0 15px var(--team-color); }
+        
+        /* USA Theme Variables */
+        body.theme-usa { --primary-hsl: 221 83% 53%; --team-color: #3b82f6; --primary: 3b82f6; }
+        body.theme-usa .text-primary { color: #3b82f6; }
+        body.theme-usa .bg-primary { background-color: #3b82f6; }
+        body.theme-usa .border-primary\/20 { border-color: rgba(59, 130, 246, 0.2); }
+        body.theme-usa .glow-text { text-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        body.theme-usa .hover-elevate:hover { box-shadow: 0 20px 40px -20px rgba(59, 130, 246, 0.4); border-color: rgba(59, 130, 246, 0.5); }
+        body.theme-usa .war-progress-bar { background: linear-gradient(90deg, #1e3a8a, #3b82f6, #ef4444); }
+        body.theme-usa input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        body.theme-usa .point-animation.text-primary { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        
+        /* URSS Theme Variables */
+        body.theme-urss { --primary-hsl: 0 84% 60%; --team-color: #ef4444; --primary: ef4444; }
+        body.theme-urss .text-primary { color: #ef4444; }
+        body.theme-urss .bg-primary { background-color: #ef4444; }
+        body.theme-urss .border-primary\/20 { border-color: rgba(239, 68, 68, 0.2); }
+        body.theme-urss .glow-text { text-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        body.theme-urss .hover-elevate:hover { box-shadow: 0 20px 40px -20px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.5); }
+        body.theme-urss .war-progress-bar { background: linear-gradient(90deg, #7f1d1d, #ef4444, #facc15); }
+        body.theme-urss input:focus { border-color: #ef4444; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2); }
+        body.theme-urss .point-animation.text-primary { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+
+        #report { border: 1px solid rgba(255,255,255,0.1); transition: all 0.4s ease; position: relative; overflow: hidden; background: rgba(0,0,0,0.4); }
+        body.theme-usa #report { border-color: rgba(59, 130, 246, 0.4); background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 58, 138, 0.2) 100%); box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1); }
+        body.theme-urss #report { border-color: rgba(239, 68, 68, 0.4); background: linear-gradient(135deg, rgba(24, 9, 9, 0.9) 0%, rgba(153, 27, 27, 0.2) 100%); box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.1); }
+        #report::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.02) 1px, rgba(255,255,255,0.02) 2px); pointer-events: none; }
+
         input[type="number"], input[type="text"], select { background: hsl(240 3.7% 10%); border: 1px solid hsl(240 3.7% 15.9%); color: white; padding: 0.6rem; border-radius: 8px; width: 100%; transition: all 0.2s; }
         input:focus { outline: none; border-color: hsl(142.1 70.6% 45.3%); box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
         input[type="checkbox"] { accent-color: hsl(142.1 70.6% 45.3%); width: 1.2rem; height: 1.2rem; cursor: pointer; }
@@ -48,11 +93,62 @@
         .war-progress-info { display: flex; justify-content: space-between; font-size: 10px; font-weight: 900; text-transform: uppercase; color: hsl(240 5% 64.9%); margin-top: 0.5rem; letter-spacing: 0.05em; }
     </style>
 </head>
-<body class="p-4 md:p-8 min-h-screen">
+<body class="p-4 md:p-8 min-h-screen overflow-hidden">
+    <div id="team-overlay">
+        <div class="max-w-4xl w-full p-8">
+            <div class="text-center mb-10">
+                <h2 class="text-6xl font-black tracking-tighter uppercase italic mb-4">Escolha seu <span class="text-primary glow-text">Lado</span></h2>
+                <p class="text-zinc-500 font-mono text-sm tracking-widest uppercase">A 4ª Guerra começou. Identifique-se e defina sua lealdade.</p>
+            </div>
+            
+            <div class="max-w-md mx-auto mb-12 space-y-4">
+                <input type="text" id="userName" placeholder="SEU NOME" class="text-center text-lg font-black uppercase tracking-widest border-zinc-700 bg-zinc-900/50">
+                <input type="text" id="userDiscord" placeholder="@USUÁRIO_DISCORD" class="text-center text-lg font-black uppercase tracking-widest border-zinc-700 bg-zinc-900/50">
+                <p id="overlay-error" class="text-red-500 text-[10px] font-bold uppercase tracking-widest hidden">Você precisa informar seu @Discord e selecionar um time!</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+                <div class="team-card usa" onclick="validateAndSetTeam('usa')" onmouseenter="previewTeam('usa')" onmouseleave="previewTeam(null)">
+                    <div class="relative mb-6">
+                        <img src="https://flagcdn.com/w640/us.png" class="w-full aspect-video object-cover rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-110" alt="USA">
+                        <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20"></div>
+                    </div>
+                    <span class="text-3xl font-black uppercase tracking-tighter text-blue-500 block mb-2">Estados Unidos</span>
+                    <div class="h-1 w-12 bg-blue-600 mx-auto mb-4 rounded-full"></div>
+                    <p class="text-[10px] text-zinc-400 font-bold tracking-[0.3em] uppercase">Democracia & Prosperidade</p>
+                </div>
+
+                <div class="text-2xl font-black text-zinc-700 italic">VS</div>
+
+                <div class="team-card urss" onclick="validateAndSetTeam('urss')" onmouseenter="previewTeam('urss')" onmouseleave="previewTeam(null)">
+                    <div class="relative mb-6">
+                        <img src="https://flagcdn.com/w640/ru.png" class="w-full aspect-video object-cover rounded-2xl shadow-2xl" alt="URSS">
+                        <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/20"></div>
+                    </div>
+                    <span class="text-3xl font-black uppercase tracking-tighter text-red-500 block mb-2">União Soviética</span>
+                    <div class="h-1 w-12 bg-red-600 mx-auto mb-4 rounded-full"></div>
+                    <p class="text-[10px] text-zinc-400 font-bold tracking-[0.3em] uppercase">Revolução & Coletividade</p>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="max-w-4xl mx-auto space-y-8">
         <header class="flex flex-col md:flex-row justify-between items-center border-b border-zinc-800 pb-8 sticky top-0 bg-background/90 backdrop-blur-xl z-50">
             <div class="text-center md:text-left mb-4 md:mb-0 w-full md:w-auto">
-                <h1 class="text-3xl font-black tracking-tighter">CALCULADORA <span class="text-primary glow-text">GUERRA</span></h1>
+                <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                    <h1 class="text-3xl font-black tracking-tighter">CALCULADORA <span class="text-primary glow-text">GUERRA</span></h1>
+                    <div class="flex items-center justify-center gap-4 bg-zinc-800/50 p-2 rounded-xl border border-zinc-700/30">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-[8px] font-bold text-zinc-500 uppercase">USA</span>
+                            <img src="https://flagcdn.com/w80/us.png" onclick="setTeam('usa')" id="flag-usa" class="team-flag w-8 h-5 object-cover" alt="USA">
+                        </div>
+                        <div class="w-px h-6 bg-zinc-700"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="text-[8px] font-bold text-zinc-500 uppercase">URSS</span>
+                            <img src="https://flagcdn.com/w80/ru.png" onclick="setTeam('urss')" id="flag-urss" class="team-flag w-8 h-5 object-cover" alt="URSS">
+                        </div>
+                    </div>
+                </div>
                 <div class="flex items-center gap-3 mt-1 justify-center md:justify-start">
                     <p class="text-[10px] text-muted-foreground uppercase font-mono tracking-widest">System Status: Active</p>
                     <input type="date" id="reportDate" onmouseover="this.showPicker()" onchange="updateWarProgress()" class="!w-auto bg-transparent border-none text-[10px] p-0 font-mono text-primary cursor-pointer">
@@ -261,33 +357,36 @@
                     </div>
                 </section>
 
-                <!-- EVENTOS -->
-                <section class="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 space-y-6 hover-elevate">
-                    <h2 class="text-xs font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span> Eventos e Missões
-                    </h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Kahoot (Posição)</label>
-                            <select id="kahootPos" onchange="calcWithAnim('kahootPos')" class="text-xs">
-                                <option value="0">Não participou</option>
-                                <option value="250">Abaixo de Top 5 (250)</option>
-                                <option value="500">Top 5 (500)</option>
-                                <option value="1000">Top 4 (1000)</option>
-                                <option value="1500">Top 3 (1500)</option>
-                                <option value="2000">Top 2 (2000)</option>
-                                <option value="3500">Top 1 (3500)</option>
-                            </select>
+            <section class="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-6 space-y-6 hover-elevate">
+                <h2 class="text-xs font-black text-primary uppercase tracking-[0.2em] flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary inline-block"></span> Eventos e Missões
+                </h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Kahoot (Posição)</label>
+                        <select id="kahootPos" onchange="calcWithAnim('kahootPos')" class="text-xs">
+                            <option value="0">Não participou</option>
+                            <option value="250">Abaixo de Top 5 (250)</option>
+                            <option value="500">Top 5 (500)</option>
+                            <option value="1000">Top 4 (1000)</option>
+                            <option value="1500">Top 3 (1500)</option>
+                            <option value="2000">Top 2 (2000)</option>
+                            <option value="3500">Top 1 (3500)</option>
+                        </select>
+                    </div>
+                    <div class="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/50">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="coletiva" onchange="calcWithAnim('coletiva')">
+                            <label class="text-sm font-bold uppercase cursor-pointer" for="coletiva">FEZ LISTA COLETIVA (+500)</label>
                         </div>
-                        <div class="bg-zinc-800/30 p-4 rounded-xl border border-zinc-700/50">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" id="coletiva" onchange="calcWithAnim('coletiva')">
-                                <label class="text-sm font-bold uppercase cursor-pointer">LISTA COLETIVA (+500)</label>
-                            </div>
-                            <input type="text" id="coletivaWith" placeholder="FEZ COM QUEM?" class="mt-3 text-[11px] h-9">
+                        <div class="mt-4 space-y-2">
+                            <label class="block text-[10px] font-bold text-zinc-500 uppercase">Quantas pessoas fizeram a lista? (Obrigatório)</label>
+                            <input type="number" id="coletivaCount" min="1" placeholder="ex: 3" oninput="calcWithAnim('coletivaCount')" class="text-xs">
+                            <input type="text" id="coletivaWith" placeholder="Nomes dos participantes (Obrigatório)" oninput="calcWithAnim('coletivaWith')" class="mt-1 text-[11px] h-9">
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
             </div>
         </div>
 
@@ -324,6 +423,49 @@
     <script>
         document.getElementById('reportDate').valueAsDate = new Date();
         let lastPoints = 0;
+        let currentTeam = null;
+
+        function setTeam(team) {
+            currentTeam = team;
+            document.body.classList.remove('theme-usa', 'theme-urss');
+            document.getElementById('flag-usa').classList.remove('active');
+            document.getElementById('flag-urss').classList.remove('active');
+            
+            if (team === 'usa') {
+                document.body.classList.add('theme-usa');
+                document.getElementById('flag-usa').classList.add('active');
+            } else if (team === 'urss') {
+                document.body.classList.add('theme-urss');
+                document.getElementById('flag-urss').classList.add('active');
+            }
+            
+            // Hide the overlay to allow interaction
+            document.getElementById('team-overlay').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('team-overlay').style.display = 'none';
+            }, 600);
+            
+            // Allow pointer events on the body and calculator sections
+            document.body.style.overflow = 'auto';
+            
+            // Forçar atualização do relatório imediatamente após selecionar o time
+            updateDisplay(lastPoints);
+        }
+
+        function validateAndSetTeam(team) {
+            const discord = document.getElementById('userDiscord').value.trim();
+            const errorEl = document.getElementById('overlay-error');
+            
+            if (!discord) {
+                errorEl.classList.remove('hidden');
+                document.getElementById('userDiscord').classList.add('border-red-500');
+                return;
+            }
+            
+            errorEl.classList.add('hidden');
+            document.getElementById('userDiscord').classList.remove('border-red-500');
+            setTeam(team);
+        }
 
         function updateWarProgress() {
             const dateInput = document.getElementById('reportDate').value;
@@ -400,6 +542,7 @@
         function showPointPop(points, elementId) {
             if (points === 0) return;
             const el = document.getElementById(elementId);
+            if (!el) return;
             const rect = el.getBoundingClientRect();
             const pop = document.createElement('div');
             pop.innerText = points > 0 ? `+${points}` : points;
@@ -422,6 +565,15 @@
             const dateInput = document.getElementById('reportDate').value;
             const date = dateInput ? dateInput.split('-').reverse().join('/') : '';
             
+            const userName = document.getElementById('userName').value || 'AGENTE';
+            let userDiscord = document.getElementById('userDiscord').value.trim() || 'DESCONHECIDO';
+            if (userDiscord !== 'DESCONHECIDO' && !userDiscord.startsWith('@')) {
+                userDiscord = '@' + userDiscord;
+            }
+
+            const teamInfo = currentTeam === 'usa' ? '🇺🇸 ESTADOS UNIDOS' : 
+                           currentTeam === 'urss' ? '☭ UNIÃO SOVIÉTICA' : 'NENHUM TIME SELECIONADO';
+
             const hRaw = document.getElementById('hours-exact').value;
             const shRaw = document.getElementById('streamHours-exact').value;
             const chRaw = document.getElementById('camHours-exact').value;
@@ -463,42 +615,79 @@
             else if (shHours > 0 || chHours > 0) multText = "1.3x (Foco Vídeo)";
 
             let report = `[RELATÓRIO DE DESEMPENHO - ${date}]\n`;
+            report += `SOLDADO: ${userName} (${userDiscord})\n`;
+            report += `TIME: ${teamInfo}\n`;
             report += `-------------------------------------------\n`;
             
             if (h > 0) report += `TEMPO DE ESTUDO: ${hRaw} (Normais)\n`;
             if (sh > 0 || ch > 0) report += `CHAMADAS: ${shRaw || '0h'} Stream / ${chRaw || '0h'} Cam\n`;
             
-            if (totalH > 0) report += `TEMPO TOTAL: ${document.getElementById('total-hours-sum').innerText}\n`;
-            
-            if (!metaBatida) {
-                report += `⚠️ META DIÁRIA: NÃO BATIDA (-300 PTS)\n`;
-            } else {
-                report += `✅ META DIÁRIA: BATIDA (Mín. 3h)\n`;
+            if (totalH > 0) {
+                report += `TEMPO TOTAL: ${document.getElementById('total-hours-sum').innerText}\n`;
+                if (!metaBatida) {
+                    report += `⚠️ META DIÁRIA: NÃO BATIDA (-300 PTS)\n`;
+                } else {
+                    report += `✅ META DIÁRIA: BATIDA (Mín. 3h)\n`;
+                }
+                report += `FOCO: ${multText}\n`;
             }
-
-            report += `FOCO: ${multText}\n`;
             
             if (mad > 0) report += `HORAS DE OURO: ${madRaw}\n`;
-            report += `PÁGINAS LIDAS: ${pages}\n`;
-            report += `-------------------------------------------\n`;
+            if (pages > 0) report += `PÁGINAS LIDAS: ${pages}\n`;
             
-            report += `REDAÇÕES: ${e1} N1 | ${e2} N2 | ${e3} N3 | ${e4} N4\n`;
-            report += `QUESTÕES MFQ: ${q_mfq1} N1 | ${q_mfq2} N2 | ${q_mfq3} N3 | ${q_mfq4} N4\n`;
-            report += `QUESTÕES HUMANAS: ${q_hum1} N1 | ${q_hum2} N2 | ${q_hum3} N3 | ${q_hum4} N4\n`;
-            report += `QUESTÕES LINGUAGENS: ${q_lin1} N1 | ${q_lin2} N2 | ${q_lin3} N3 | ${q_lin4} N4\n`;
+            let essayLine = "";
+            if (e1 > 0) essayLine += `${e1} N1 | `;
+            if (e2 > 0) essayLine += `${e2} N2 | `;
+            if (e3 > 0) essayLine += `${e3} N3 | `;
+            if (e4 > 0) essayLine += `${e4} N4 | `;
+            if (essayLine) report += `REDAÇÕES: ${essayLine.slice(0, -3)}\n`;
+
+            let mfqLine = "";
+            if (q_mfq1 > 0) mfqLine += `${q_mfq1} N1 | `;
+            if (q_mfq2 > 0) mfqLine += `${q_mfq2} N2 | `;
+            if (q_mfq3 > 0) mfqLine += `${q_mfq3} N3 | `;
+            if (q_mfq4 > 0) mfqLine += `${q_mfq4} N4 | `;
+            if (mfqLine) report += `QUESTÕES MFQ: ${mfqLine.slice(0, -3)}\n`;
+
+            let humLine = "";
+            if (q_hum1 > 0) humLine += `${q_hum1} N1 | `;
+            if (q_hum2 > 0) humLine += `${q_hum2} N2 | `;
+            if (q_hum3 > 0) humLine += `${q_hum3} N3 | `;
+            if (q_hum4 > 0) humLine += `${q_hum4} N4 | `;
+            if (humLine) report += `QUESTÕES HUMANAS: ${humLine.slice(0, -3)}\n`;
+
+            let linLine = "";
+            if (q_lin1 > 0) linLine += `${q_lin1} N1 | `;
+            if (q_lin2 > 0) linLine += `${q_lin2} N2 | `;
+            if (q_lin3 > 0) linLine += `${q_lin3} N3 | `;
+            if (q_lin4 > 0) linLine += `${q_lin4} N4 | `;
+            if (linLine) report += `QUESTÕES LINGUAGENS: ${linLine.slice(0, -3)}\n`;
             
-            report += `-------------------------------------------\n`;
+            const work = document.getElementById('workSchool').checked;
+            const coletiva = document.getElementById('coletiva').checked;
+            const simulado = document.getElementById('simulado').checked;
 
-            const work = document.getElementById('workSchool').checked ? `SIM (${document.getElementById('workSchoolName').value || 'Não informado'})` : 'NÃO';
-            const coletiva = document.getElementById('coletiva').checked ? `SIM (Com: ${document.getElementById('coletivaWith').value || 'Não informado'})` : 'NÃO';
-
-            report += `TEVE AULA/TRABALHO: ${work}\n`;
-            report += `LISTA COLETIVA: ${coletiva}\n`;
-            report += `SIMULADO: ${document.getElementById('simulado').checked ? 'REALIZADO' : 'NÃO REALIZADO'}\n`;
+            if (work || coletiva || simulado) {
+                report += `-------------------------------------------\n`;
+                if (work) report += `TEVE AULA/TRABALHO: SIM (${document.getElementById('workSchoolName').value || 'Não informado'})\n`;
+                if (coletiva) {
+                    const cCount = document.getElementById('coletivaCount').value || '?';
+                    report += `LISTA COLETIVA: SIM (${cCount} pessoas - Com: ${document.getElementById('coletivaWith').value || 'Não informado'})\n`;
+                }
+                if (simulado) report += `SIMULADO: REALIZADO\n`;
+            }
 
             report += `-------------------------------------------\n`;
             report += `PONTUAÇÃO FINAL: ${Math.floor(total).toLocaleString()} PTS\n`;
             document.getElementById('report').innerText = report;
+        }
+
+        function previewTeam(team) {
+            if (!team) {
+                document.body.style.backgroundColor = 'hsl(240 10% 3.9%)';
+                return;
+            }
+            document.body.style.backgroundColor = team === 'usa' ? 'rgba(59, 130, 246, 0.05)' : 'rgba(239, 68, 68, 0.05)';
         }
 
         function calculateTotal() {
@@ -556,6 +745,9 @@
                 if (acc === '70') total += 180;
                 if (acc === '90') total += 250;
             }
+
+            // Final Update for Display
+            updateDisplay(total);
             return total;
         }
 
@@ -569,6 +761,17 @@
         }
 
         function copyReport() {
+            const coletivaCheck = document.getElementById('coletiva').checked;
+            const coletivaWith = document.getElementById('coletivaWith').value.trim();
+            
+            if (coletivaCheck && !coletivaWith) {
+                alert("ERRO: Para copiar o relatório com Lista Coletiva, você deve informar quem participou!");
+                document.getElementById('coletivaWith').focus();
+                document.getElementById('coletivaWith').classList.add('border-red-500');
+                return;
+            }
+            
+            document.getElementById('coletivaWith').classList.remove('border-red-500');
             const text = document.getElementById('report').innerText;
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.querySelector('button[onclick="copyReport()"]');
