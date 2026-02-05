@@ -653,12 +653,20 @@
                             ></p>
                         </div>
 
-                        <button
-                            onclick="copyGeneralReport()"
-                            class="w-full bg-zinc-800 border border-zinc-700 hover:border-primary/50 text-white font-black py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2"
-                        >
-                            <span>📋</span> COPIAR RELATÓRIO FINAL
-                        </button>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button
+                                onclick="copyGeneralReport()"
+                                class="bg-zinc-800 border border-zinc-700 hover:border-primary/50 text-white font-black py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2"
+                            >
+                                <span>📋</span> Relatório Geral
+                            </button>
+                            <button
+                                onclick="generateFinalRankingText()"
+                                class="bg-yellow-600 border border-yellow-500/50 hover:bg-yellow-500 text-white font-black py-4 rounded-xl transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2 shadow-lg shadow-yellow-600/20"
+                            >
+                                <span>🏆</span> Ranking (Ping)
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1794,14 +1802,20 @@
 
                 const userName =
                     document.getElementById("userName").value || "AGENTE";
-                let userDiscord =
+                const userDiscord =
                     document.getElementById("userDiscord").value.trim() ||
                     "DESCONHECIDO";
-                if (
-                    userDiscord !== "DESCONHECIDO" &&
-                    !userDiscord.startsWith("@")
-                ) {
-                    userDiscord = "@" + userDiscord;
+                
+                // Formatação para exibição no relatório individual (evita ping)
+                let displayDiscord = userDiscord;
+                if (userDiscord !== "DESCONHECIDO") {
+                    // Remove caracteres invisíveis anteriores para garantir consistência
+                    let cleanDiscord = userDiscord.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
+                    if (cleanDiscord.startsWith("@")) {
+                        displayDiscord = "@" + "\u200B" + cleanDiscord.substring(1);
+                    } else {
+                        displayDiscord = "@" + "\u200B" + cleanDiscord;
+                    }
                 }
 
                 const teamInfo =
@@ -1870,27 +1884,27 @@
                 else if (shHours > 0 || chHours > 0)
                     multText = "1.3x (Foco Vídeo)";
 
-                let report = `[RELATÓRIO DE DESEMPENHO - ${date}]\n`;
-                report += `SOLDADO: ${userName} (${userDiscord})\n`;
-                report += `TIME: ${teamInfo}\n`;
+                let report = `**[RELATÓRIO DE DESEMPENHO - ${date}]**\n`;
+                report += `**SOLDADO:** ${userName} (${displayDiscord})\n`;
+                report += `**TIME:** ${teamInfo}\n`;
                 report += `-------------------------------------------\n`;
 
-                if (h > 0) report += `TEMPO DE ESTUDO: ${hRaw} (Normais)\n`;
+                if (h > 0) report += `**TEMPO DE ESTUDO:** ${hRaw} (Normais)\n`;
                 if (sh > 0 || ch > 0)
-                    report += `CHAMADAS: ${shRaw || "0h"} Stream / ${chRaw || "0h"} Cam\n`;
+                    report += `**CHAMADAS:** ${shRaw || "0h"} Stream / ${chRaw || "0h"} Cam\n`;
 
                 if (totalH > 0) {
-                    report += `TEMPO TOTAL: ${document.getElementById("total-hours-sum").innerText}\n`;
+                    report += `**TEMPO TOTAL:** ${document.getElementById("total-hours-sum").innerText}\n`;
                     if (!metaBatida) {
-                        report += `⚠️ META DIÁRIA: NÃO BATIDA (-300 PTS)\n`;
+                        report += `⚠️ **META DIÁRIA:** NÃO BATIDA (-300 PTS)\n`;
                     } else {
-                        report += `✅ META DIÁRIA: BATIDA (Mín. 3h)\n`;
+                        report += `✅ **META DIÁRIA:** BATIDA (Mín. 3h)\n`;
                     }
-                    report += `FOCO: ${multText}\n`;
+                    report += `**FOCO:** ${multText}\n`;
                 }
 
-                if (mad > 0) report += `HORAS DE OURO: ${madRaw}\n`;
-                if (pages > 0) report += `PÁGINAS LIDAS: ${pages}\n`;
+                if (mad > 0) report += `**HORAS DE OURO:** ${madRaw}\n`;
+                if (pages > 0) report += `**PÁGINAS LIDAS:** ${pages}\n`;
 
                 let essayLine = "";
                 if (e1 > 0) essayLine += `${e1} N1 | `;
@@ -1898,7 +1912,7 @@
                 if (e3 > 0) essayLine += `${e3} N3 | `;
                 if (e4 > 0) essayLine += `${e4} N4 | `;
                 if (essayLine)
-                    report += `REDAÇÕES: ${essayLine.slice(0, -3)}\n`;
+                    report += `**REDAÇÕES:** ${essayLine.slice(0, -3)}\n`;
 
                 let mfqLine = "";
                 if (q_mfq1 > 0) mfqLine += `${q_mfq1} N1 | `;
@@ -1906,7 +1920,7 @@
                 if (q_mfq3 > 0) mfqLine += `${q_mfq3} N3 | `;
                 if (q_mfq4 > 0) mfqLine += `${q_mfq4} N4 | `;
                 if (mfqLine)
-                    report += `QUESTÕES MFQ: ${mfqLine.slice(0, -3)}\n`;
+                    report += `**QUESTÕES MFQ:** ${mfqLine.slice(0, -3)}\n`;
 
                 let humLine = "";
                 if (q_hum1 > 0) humLine += `${q_hum1} N1 | `;
@@ -1914,7 +1928,7 @@
                 if (q_hum3 > 0) humLine += `${q_hum3} N3 | `;
                 if (q_hum4 > 0) humLine += `${q_hum4} N4 | `;
                 if (humLine)
-                    report += `QUESTÕES HUMANAS: ${humLine.slice(0, -3)}\n`;
+                    report += `**QUESTÕES HUMANAS:** ${humLine.slice(0, -3)}\n`;
 
                 let linLine = "";
                 if (q_lin1 > 0) linLine += `${q_lin1} N1 | `;
@@ -1922,7 +1936,7 @@
                 if (q_lin3 > 0) linLine += `${q_lin3} N3 | `;
                 if (q_lin4 > 0) linLine += `${q_lin4} N4 | `;
                 if (linLine)
-                    report += `QUESTÕES LINGUAGENS: ${linLine.slice(0, -3)}\n`;
+                    report += `**QUESTÕES LINGUAGENS:** ${linLine.slice(0, -3)}\n`;
 
                 const work = document.getElementById("workSchool").checked;
                 const coletiva = document.getElementById("coletiva").checked;
@@ -1931,18 +1945,18 @@
                 if (work || coletiva || simulado) {
                     report += `-------------------------------------------\n`;
                     if (work)
-                        report += `TEVE AULA/TRABALHO: SIM (${document.getElementById("workSchoolName").value || "Não informado"})\n`;
+                        report += `**TEVE AULA/TRABALHO:** SIM (${document.getElementById("workSchoolName").value || "Não informado"})\n`;
                     if (coletiva) {
                         const cCount =
                             document.getElementById("coletivaCount").value ||
                             "?";
-                        report += `LISTA COLETIVA: SIM (${cCount} pessoas - Com: ${document.getElementById("coletivaWith").value || "Não informado"})\n`;
+                        report += `**LISTA COLETIVA:** SIM (${cCount} pessoas - Com: ${document.getElementById("coletivaWith").value || "Não informado"})\n`;
                     }
-                    if (simulado) report += `SIMULADO: REALIZADO\n`;
+                    if (simulado) report += `**SIMULADO:** REALIZADO\n`;
                 }
 
                 report += `-------------------------------------------\n`;
-                report += `PONTUAÇÃO FINAL: ${Math.floor(total).toLocaleString()} PTS\n`;
+                report += `**PONTUAÇÃO FINAL:** ${Math.floor(total).toLocaleString()} PTS\n`;
                 document.getElementById("report").innerText = report;
             }
 
@@ -2078,7 +2092,12 @@
                 document
                     .getElementById("coletivaWith")
                     .classList.remove("border-red-500");
-                const text = document.getElementById("report").innerText;
+                let text = document.getElementById("report").innerText;
+                
+                                // Remove apenas outros caracteres de controle se necessário.
+                // IMPORTANTE: NÃO removemos o \u200B aqui para que o relatório individual não marque ninguém
+                text = text.replace(/[\u200C\u200D\uFEFF]/g, "");
+                
                 navigator.clipboard.writeText(text).then(() => {
                     const btn = document.querySelector(
                         'button[onclick="copyReport()"]',
@@ -2151,8 +2170,11 @@
                         let discord = discordMatch
                             ? discordMatch[1].trim()
                             : "DESCONHECIDO";
-                        if (!discord.startsWith("@")) discord = "@" + discord;
-
+                        
+                                        // O Discord original sem caractere invisível é usado internamente para agregação
+                        // e será o que sobrará se o usuário colar o relatório
+                        discord = discord.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
+                        
                         const teamRaw = teamMatch[1].trim().toLowerCase();
                         const team =
                             teamRaw.includes("estados unidos") ||
@@ -2312,22 +2334,25 @@
                     .getElementById("ranking-urss-list")
                     .querySelectorAll("div");
 
-                let text = `# 🏆 RELATÓRIO FINAL DE GUERRA\n\n`;
+                let text = `# **🏆 RELATÓRIO FINAL DE GUERRA**\n\n`;
 
-                text += `Liderança: ${winner}\n\n`;
+                text += `**Liderança:** ${winner}\n\n`;
 
                 if (baseUsa > 0 || baseUrss > 0) {
-                    text += `📊 PONTOS ANTERIORES:\n`;
-                    text += `🇺🇸 USA: ${baseUsa.toLocaleString()} PTS\n`;
-                    text += `☭ URSS: ${baseUrss.toLocaleString()} PTS\n\n`;
+                    text += `**📊 PONTOS ANTERIORES:**\n`;
+                    text += `**🇺🇸 USA:** ${baseUsa.toLocaleString()} PTS\n`;
+                    text += `**☭ URSS:** ${baseUrss.toLocaleString()} PTS\n\n`;
                 }
 
-                text += `# 🇺🇸 TOTAL USA: ${totalUsa}\n`;
-                text += `# ☭ TOTAL URSS: ${totalUrss}\n\n`;
+                text += `# **🇺🇸 TOTAL USA:** ${totalUsa}\n`;
+                text += `# **☭ TOTAL URSS:** ${totalUrss}\n\n`;
 
                 text += `-------------------------------------------\n\n`;
+                
+                // Botão para gerar ranking final com pings (para administradores)
+                text += `[GERAR RANKING FINAL COM PINGS (COPY)]\n\n`;
 
-                text += `## 🇺🇸 RANKING USA\n`;
+                text += `## **🇺🇸 RANKING USA**\n`;
                 if (
                     usaItems.length === 0 ||
                     (usaItems.length === 1 &&
@@ -2342,11 +2367,11 @@
                             item.querySelector("span:nth-child(2)").innerText;
                         const points =
                             item.querySelector("span:nth-child(3)").innerText;
-                        text += `${rank} ${discord} — ${points}\n`;
+                        text += `${rank} | ${discord} | ${points}\n`;
                     });
                 }
 
-                text += `\n## ☭ RANKING URSS\n`;
+                text += `\n## **☭ RANKING URSS**\n`;
                 if (
                     urssItems.length === 0 ||
                     (urssItems.length === 1 &&
@@ -2361,19 +2386,22 @@
                             item.querySelector("span:nth-child(2)").innerText;
                         const points =
                             item.querySelector("span:nth-child(3)").innerText;
-                        text += `${rank} ${discord} — ${points}\n`;
+                        text += `${rank} | ${discord} | ${points}\n`;
                     });
                 }
 
                 if (manualAdjustments.length > 0) {
                     text += `\n-------------------------------------------\n`;
-                    text += `*AJUSTES DE TIME*\n`;
+                    text += `**AJUSTES DE TIME**\n`;
                     manualAdjustments.forEach((adj) => {
-                        text += `• ${adj.discord}: ${adj.points} PTS (${adj.reason})\n`;
+                        text += `• ${adj.discord} | ${adj.points.toLocaleString()} PTS | ${adj.reason}\n`;
                     });
                 }
 
                 text += `\n\nGerado em ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+
+                // Remove o caractere invisível ao copiar para o Discord
+                text = text.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
 
                 navigator.clipboard.writeText(text).then(() => {
                     alert("RELATÓRIO FINAL COPIADO!");
@@ -2389,16 +2417,82 @@
                 }
 
                 el.innerHTML = list
-                    .map(
-                        (p, i) => `
+                    .map((p, i) => {
+                        // Adiciona caractere invisível apenas na exibição visual do ranking no site
+                        let displayDiscord = p.discord;
+                        if (displayDiscord !== "DESCONHECIDO") {
+                            if (displayDiscord.startsWith("@")) {
+                                displayDiscord = "@" + "\u200B" + displayDiscord.substring(1);
+                            } else {
+                                displayDiscord = "@" + "\u200B" + displayDiscord;
+                            }
+                        }
+                        
+                        return `
                 <div class="flex justify-between items-center p-2 rounded bg-black/20 border-l-2 border-${color}-500">
                     <span class="text-zinc-400 w-6">#${i + 1}</span>
-                    <span class="flex-1 font-bold text-zinc-200 truncate mx-2">${p.discord}</span>
+                    <span class="flex-1 font-bold text-zinc-200 truncate mx-2">${displayDiscord}</span>
                     <span class="text-${color}-500 font-black">${p.points.toLocaleString()} PTS</span>
                 </div>
-            `,
-                    )
+            `;
+                    })
                     .join("");
+            }
+
+            function generateFinalRankingText() {
+                const input = document.getElementById("discord-input").value;
+                if (!input.trim() && manualAdjustments.length === 0) {
+                    alert("Não há dados para gerar o ranking final!");
+                    return;
+                }
+
+                const reports = input
+                    .split(/\[RELATÓRIO DE DESEMPENHO - \d{2}\/\d{2}\/\d{4}\]/g)
+                    .filter((r) => r.trim());
+
+                let players = [];
+                reports.forEach((report) => {
+                    const nameMatch = report.match(/SOLDADO:\s*(.*?)\s*\(/);
+                    const discordMatch = report.match(/\((.*?)\)/);
+                    const pointsMatch = report.match(/PONTUAÇÃO FINAL:\s*([\d.,]+)\s*PTS/);
+
+                    if (nameMatch && pointsMatch) {
+                        const name = nameMatch[1].trim();
+                        let discord = discordMatch ? discordMatch[1].trim() : "DESCONHECIDO";
+                        discord = discord.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
+                        
+                        if (discord !== "DESCONHECIDO" && !discord.startsWith("@")) {
+                            discord = "@" + discord;
+                        }
+
+                        const points = parseInt(pointsMatch[1].replace(/[.,]/g, ""));
+
+                        let existing = players.find(p => p.discord === discord);
+                        if (existing) existing.points += points;
+                        else players.push({ name, discord, points });
+                    }
+                });
+
+                manualAdjustments.forEach(adj => {
+                    if (!adj.discord.startsWith("EQUIPE")) {
+                        let discord = adj.discord.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
+                        if (!discord.startsWith("@")) discord = "@" + discord;
+                        let p = players.find(p => p.discord === discord);
+                        if (p) p.points += adj.points;
+                    }
+                });
+
+                const sortedPlayers = players.sort((a, b) => b.points - a.points);
+                
+                let rankingText = "🏆 **RANKING GERAL DE GUERRA** 🏆\n\n";
+                sortedPlayers.forEach((p, i) => {
+                    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🎖️";
+                    rankingText += `${medal} ${p.discord} - ${p.points.toLocaleString()} PTS\n`;
+                });
+
+                navigator.clipboard.writeText(rankingText).then(() => {
+                    alert("Ranking Final Copiado com Sucesso (Pronto para pingar no Discord)!");
+                });
             }
 
             function copyRanking(team) {
@@ -2419,14 +2513,17 @@
                         item.querySelector("span:nth-child(2)").innerText;
                     const points =
                         item.querySelector("span:nth-child(3)").innerText;
-                    text += `${rank} ${discord} | ${points}\n`;
+                    text += `${rank} | ${discord} | ${points}\n`;
                 });
 
                 const totalPts = document.getElementById(
                     `total-${team}-pts`,
                 ).innerText;
                 text += `-------------------------------------------\n`;
-                text += `TOTAL DA EQUIPE: ${totalPts}`;
+                text += `**TOTAL DA EQUIPE:** ${totalPts}`;
+
+                // Remove o caractere invisível ao copiar
+                text = text.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
 
                 navigator.clipboard.writeText(text).then(() => {
                     const btn = event.target;
